@@ -1,28 +1,34 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <v-app>
+    <div>
+      <v-toolbar
+        dark
+        prominent
+        src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
+      >
+        <v-app-bar-nav-icon></v-app-bar-nav-icon>
+
+        <v-toolbar-title>PeeBu</v-toolbar-title>
+
+        <v-spacer></v-spacer>
+      </v-toolbar>
+      <LandingPage/>
+    </div>
+  </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import LandingPage from './components/LandingPage';
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+  components: {
+    LandingPage,
+  },
+
+  data: () => ({
+    //
+  }),
+};
+</script>

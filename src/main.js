@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import firebase from 'firebase'
+import vuetify from './plugins/vuetify';
 
 Vue.config.productionTip = false
 
@@ -21,5 +22,6 @@ firebase.initializeApp(firebaseConfig);
 firebase.analytics();
 
 new Vue({
-  render: h => h(App),
+  vuetify,
+  render: h => h(App)
 }).$mount('#app')
