@@ -8,7 +8,7 @@
       >
         <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
-        <v-toolbar-title>PeeBu Software Quality</v-toolbar-title>
+        <v-toolbar-title>PeeBu</v-toolbar-title>
 
         <v-spacer></v-spacer>
       </v-toolbar>
