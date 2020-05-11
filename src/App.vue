@@ -16,17 +16,27 @@
 
           <v-divider></v-divider>
 
-          <v-list-item v-for="item in items" :key="item.title">
+          <v-list-item v-for="item in items" :key="item.title" :to="item.url">
             <v-list-item-icon color="white">
               <v-icon color="white">{{ item.icon }}</v-icon>
             </v-list-item-icon>
 
             <v-list-item-content>
-              <v-list-item-title class="white--text">{{
-                item.title
-              }}</v-list-item-title>
+              <v-list-item-title class="white--text">
+                {{item.title}}
+              </v-list-item-title>
             </v-list-item-content>
           </v-list-item>
+          <!-- <v-list-item>
+            <v-list-item-icon>
+              <v-icon color="white">mdi-home</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="white--text">
+                {{item.title}}
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item> -->
         </v-list>
       </v-navigation-drawer>
       <v-app-bar
@@ -35,7 +45,6 @@
         dense
         src="https://cdn.vuetifyjs.com/images/backgrounds/bg-2.jpg"
         prominent
-        extended
       >
         <v-app-bar-nav-icon
           class="white--text"
@@ -48,28 +57,21 @@
       </v-app-bar>
 
       <v-content fill-height fluid>
-        <LandingPage/>
+        <router-view></router-view>
       </v-content>
     </v-app>
   </div>
 </template>
 
 <script>
-import LandingPage from "./components/LandingPage";
-
 export default {
   name: "App",
-
-  components: {
-    LandingPage,
-  },
 
   data: () => ({
     drawer: false,
     items: [
-      { title: "Home", icon: "mdi-home" },
-      { title: "Statistics", icon: "mdi-chart-line" },
-      { title: "About", icon: "mdi-help-box" },
+      { title: "Home", icon: "mdi-home", url: "/"},
+      { title: "Statistics", icon: "mdi-chart-line" , url: "/statistics"}
     ],
     miniVariant: false,
     expandOnHover: false,

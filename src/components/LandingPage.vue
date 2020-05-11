@@ -4,13 +4,26 @@
   </v-app>
 </template>
 <script>
-export default {
-  name: 'LandingPage',
+//import axios from "axios";
+import db from "../services/firebase";
+//import * as firebase from "firebase/app";
 
- 
+export default {
+  name: "LandingPage",
 
   data: () => ({
-    //
+    transactions: []
   }),
+  methods: {
+    getAllTransactions() {
+      db.collection("transactions")
+        .get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(transanction => {
+            this.transactions.push(transanction.data());
+          });
+        });
+    }
+  }
 };
 </script>
