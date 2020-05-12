@@ -1,22 +1,25 @@
 <template>
   <v-container grid-list-md text-xs-center>
-    <!-- <h2 class="balance">
-      Balance:
-      <span class="a" v-if="balance > 0">
-        <label class="up">{{ balance }}€</label>
-      </span>
-      <span class="a" v-if="balance < 0">
-        <label class="low">{{ balance }}€</label>
-      </span>
-    </h2>-->
-    <v-data-table :headers="headers" :items="transactions" class="elevation-1 centered table">
-        <template #item.amount="{item}">
-          <div class="up" v-if="item.type === 'debit'">{{ item.amount }}</div>
-          <div class="low" v-else>{{ item.amount }}</div>
-        </template>
-        <template #item.createdAt="{item}">
-          <span>{{ item.createdAt.toDate().toLocaleDateString() + " " + item.createdAt.toDate().toLocaleTimeString() }}</span>
-        </template>
+    <v-data-table
+      :headers="headers"
+      :items="transactions"
+      item-key="id"
+      sort-by="createdAt"
+      :sort-desc="true"
+      class="elevation-1 centered table"
+    >
+      <template #item.amount="{item}">
+        <v-chip :color="getTypeColor(item.type)" dark>{{ item.amount }} €</v-chip>
+      </template>
+
+      <template #item.createdAt="{item}">
+        <span>{{ item.createdAt.toDate().toLocaleDateString() + " " + item.createdAt.toDate().toLocaleTimeString() }}</span>
+      </template>
+
+      <template #item.category="{item}">
+        <v-icon>{{ getCategory(item.category).icon }}</v-icon>
+        {{ getCategory(item.category).text }}
+      </template>
     </v-data-table>
   </v-container>
 </template>
@@ -32,16 +35,32 @@ export default {
     return {
       headers: [
         { text: "Id", value: "id" },
-        { text: "Amount", value: "amount" },
         { text: "Entity", value: "entity" },
         { text: "Source", value: "source" },
         { text: "Type", value: "type" },
-        { text: "Date", value: "createdAt" }
+        { text: "Amount", value: "amount" },
+        { text: "Date", value: "createdAt" },
+        { text: "Category", value: "category" }
       ],
-      balance: "1000",
+      balance: 0,
       transactions: [],
-      paypalTransactions: [],
-      item: { name: "Filter", url: "/filterPage" }
+      categories: [
+        { text: "Not Classified", icon: "mdi-help" },
+        { text: "Home", icon: "mdi-home" },
+        { text: "Salary", icon: "mdi-currency-usd" },
+        { text: "Food", icon: "mdi-silverware-fork-knife" },
+        { text: "Car", icon: "mdi-car" },
+        { text: "Travel", icon: "mdi-airplane" },
+        { text: "Cafe", icon: "mdi-coffee" },
+        { text: "Bar", icon: "mdi-glass-cocktail" },
+        { text: "Sports", icon: "mdi-soccer" },
+        { text: "Book", icon: "mdi-book-open" },
+        { text: "Health", icon: "mdi-medical-bag" },
+        { text: "Shopping", icon: "mdi-cart" },
+        { text: "Animal", icon: "mdi-dog" },
+        { text: "Arrangements", icon: "mdi-hammer-screwdriver" },
+        { text: "School", icon: "mdi-school" }
+      ]
     };
   },
   methods: {
@@ -65,7 +84,8 @@ export default {
             entity: this.transactions[i].entity,
             amount: Number(this.transactions[i].amount),
             type: this.transactions[i].type,
-            source: this.transactions[i].source
+            source: this.transactions[i].source,
+            category: "Not Classified"
           })
           .then(function(docRef) {
             console.log("Document written with ID: ", docRef.id);
@@ -82,110 +102,40 @@ export default {
         .then(querySnapshot => {
           querySnapshot.forEach(transanction => {
             this.transactions.push(transanction.data());
+            this.balance += transaction.data().amount;
           });
           console.log(this.transactions[0].createdAt.toDate());
         });
     },
-    //* Get All Paypal Transactions
-    getAllPaypalTransactions() {
-      db.collection("transactions")
-        .where("source", "==", "paypal")
-        .get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(transanction => {
-            this.paypalTransactions.push(transanction.data());
-          });
-        });
+
+    getTypeColor(type) {
+      if (type == "credit") return "red";
+      if (type == "invoice") return "orange";
+      else return "green";
     },
-    getTransactionsByDay() {
-      db.collection("transactions")
-        .where("source", "==", "paypal")
-        .get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(transanction => {
-            this.paypalTransactions.push(transanction.data());
-          });
-        });
+
+    getCategory(value) {
+      //let index = this.categories.indexOf(value);
+
+      let index = -1;
+      for (let i = 0; i < this.categories.length; i++) {
+        if (this.categories[i].text == value) {
+          index = i;
+        }
+      }
+
+      return this.categories[index];
     }
   },
   mounted() {
     this.getAllTransactions();
-    this.getAllPaypalTransactions();
-    this.getTransactionsByDay();
     //this.getTransactionsFromAPI(); //Usar este método quando for necessário colocar os dados na Base de Dados
   }
 };
 </script>
 
 <style scoped>
-.centered {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-right: -50%;
-  transform: translate(-50%, -50%);
-}
-
 .table {
-  width: 900px;
-  /* height: 600px; */
-}
-
-.icon {
-  align-content: center;
-}
-
-.a {
-  text-align: end;
-}
-
-.up {
-  color: green;
-}
-
-.low {
-  color: red;
-}
-
-.dot {
-  height: 50px;
-  width: 50px;
-  background-color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.border {
-  border-style: solid;
-  border-color: black;
-}
-
-.balance {
-  text-align: end;
-}
-
-.data {
-  align-items: baseline;
-}
-
-.filter-div {
-  width: 900px;
-  height: 40px;
-  position: absolute;
-  top: 9%;
-  left: 50%;
-  margin-right: -50%;
-  transform: translate(-50%, -50%);
-  background: #1e88e5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.filter {
-  font-size: 30px;
-  color: white;
+  margin: 0% 7%;
 }
 </style>
