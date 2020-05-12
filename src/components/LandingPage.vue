@@ -100,8 +100,8 @@ export default {
       db.collection("transactions")
         .get()
         .then(querySnapshot => {
-          querySnapshot.forEach(transanction => {
-            this.transactions.push(transanction.data());
+          querySnapshot.forEach(transaction => {
+            this.transactions.push(transaction.data());
             this.balance += transaction.data().amount;
           });
           console.log(this.transactions[0].createdAt.toDate());
