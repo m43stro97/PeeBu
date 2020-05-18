@@ -18,6 +18,33 @@
             Balance: {{ Math.round(balance * 100) / 100 }} €
           </v-btn>
         </v-toolbar>
+        <!-- Edit Classification Dialog -->
+      <v-dialog v-model="dialog" max-width="500px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Edit Classification of Transaction {{transaction.id}}</span>
+          </v-card-title>
+
+          <v-list dense>
+            <v-list-item-group v-model="categorySelected" color="primary">
+              <v-list-item v-for="(category, i) in categories" :key="i">
+                <v-list-item-icon>
+                  <v-icon v-text="category.icon"></v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title v-text="category.text"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
+            <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       </template>
 
       <template #item.amount="{item}">
@@ -31,6 +58,10 @@
       <template #item.category="{item}">
         <v-icon>{{ getCategory(item.category).icon }}</v-icon>
         {{ getCategory(item.category).text }}
+      </template>
+
+      <template #item.actions="{item}">
+        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
       </template>
     </v-data-table>
   </v-container>
@@ -52,7 +83,8 @@ export default {
         { text: "Type", value: "type" },
         { text: "Amount", value: "amount" },
         { text: "Date", value: "createdAt" },
-        { text: "Category", value: "category" }
+        { text: "Category", value: "category" },
+        { text: "Actions", value: "actions", sortable: false }
       ],
       balance: 0,
       transactions: [],
@@ -72,7 +104,14 @@ export default {
         { text: "Animal", icon: "mdi-dog" },
         { text: "Arrangements", icon: "mdi-hammer-screwdriver" },
         { text: "School", icon: "mdi-school" }
-      ]
+      ],
+      dialog: false,
+      transaction: {
+        id: "",
+        category: ""
+      },
+      categorySelected: "",
+      editedIndex: -1,
     };
   },
   methods: {
@@ -146,7 +185,40 @@ export default {
       }
 
       return this.categories[index];
-    }
+    },
+    editItem(item) {
+      this.editedIndex = this.transactions.indexOf(item);
+      this.transaction = Object.assign({}, item);
+      this.dialog = true;
+    },
+    close() {
+      this.dialog = false;
+      this.categorySelected = "";
+    },
+
+    save() {
+      if (this.categories[this.categorySelected]) {
+        this.transaction.category = this.categories[this.categorySelected].text;
+        Object.assign(this.transactions[this.editedIndex], this.transaction);
+
+        //* Save in Firestore
+        this.saveCategoryFirestore(this.categories[this.categorySelected]);
+      }
+      this.close();
+    },
+
+    saveCategoryFirestore(category) {
+      db.collection("transactions")
+        .where("id", "==", this.transaction.id)
+        .get()
+        .then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            db.collection("transactions")
+              .doc(doc.id)
+              .update({ category: category.text });
+          });
+        });
+    },
   },
   mounted() {
     this.getAllTransactions();
