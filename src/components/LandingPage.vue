@@ -8,6 +8,18 @@
       :sort-desc="true"
       class="elevation-1 centered table"
     >
+      <template v-slot:top>
+        <v-toolbar flat color="white">
+          <v-toolbar-title>Home</v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-spacer></v-spacer>
+          <v-btn class="ma-2" tile outlined :color="getBalanceColor(balance)">
+            <v-icon left>mdi-cash-usd-outline</v-icon>
+            Balance: {{ Math.round(balance * 100) / 100 }} €
+          </v-btn>
+        </v-toolbar>
+      </template>
+
       <template #item.amount="{item}">
         <v-chip :color="getTypeColor(item.type)" dark>{{ item.amount }} €</v-chip>
       </template>
@@ -102,9 +114,13 @@ export default {
         .then(querySnapshot => {
           querySnapshot.forEach(transaction => {
             this.transactions.push(transaction.data());
-            this.balance += transaction.data().amount;
+
+            if (transaction.data().type == "credit") {
+              this.balance += transaction.data().amount;
+            } else {
+              this.balance -= transaction.data().amount;
+            }
           });
-          console.log(this.transactions[0].createdAt.toDate());
         });
     },
 
@@ -112,6 +128,11 @@ export default {
       if (type == "credit") return "red";
       if (type == "invoice") return "orange";
       else return "green";
+    },
+
+    getBalanceColor(balance) {
+      if (balance < 0) return "red darken-4";
+      else return "green darken-1";
     },
 
     getCategory(value) {
