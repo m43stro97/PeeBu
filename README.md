@@ -12,9 +12,9 @@ Luís Campos, 2192735
 **Jenkins-admin-passwowrd:** CJW46g+W
 
 
-**Staging machine IP:** 34.91.89.183
+**Staging machine IP:** 34.90.254.120
 
-**Production machine IP:** 34.91.243.97
+**Production machine IP:** 34.91.89.183
 
 
 **Note:** The mockups are located in the "mockups" branch in "mockups" folder"
