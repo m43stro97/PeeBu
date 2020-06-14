@@ -1,24 +1,24 @@
 <template>
-  <v-container grid-list-md text-xs-center>
-    <v-data-table
-      :headers="headers"
-      :items="transactions"
-      item-key="id"
-      sort-by="createdAt"
-      :sort-desc="true"
-      class="elevation-1 centered table"
-    >
-      <template v-slot:top>
-        <v-toolbar flat color="white">
-          <v-toolbar-title>Home</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-          <v-btn class="ma-2" tile outlined :color="getBalanceColor(balance)">
-            <v-icon left>mdi-cash-usd-outline</v-icon>
-            Balance: {{ Math.round(balance * 100) / 100 }} €
-          </v-btn>
-        </v-toolbar>
-        <!-- Edit Classification Dialog -->
+  <v-data-table
+    :headers="headers"
+    :items="transactions"
+    item-key="id"
+    sort-by="createdAt"
+    :sort-desc="true"
+    :search="entitySourceFilter"
+    class="elevation-1 pa-6 table"
+  >
+    <template v-slot:top>
+      <v-toolbar flat color="white">
+        <v-toolbar-title>Home</v-toolbar-title>
+        <v-divider class="mx-4" inset vertical></v-divider>
+        <v-spacer></v-spacer>
+        <v-btn class="ma-2" tile outlined :color="getBalanceColor(balance)">
+          <v-icon left>mdi-cash-usd-outline</v-icon>
+          Balance: {{ Math.round(balance * 100) / 100 }} €
+        </v-btn>
+      </v-toolbar>
+      <!-- Edit Classification Dialog -->
       <v-dialog v-model="dialog" max-width="500px">
         <v-card>
           <v-card-title>
@@ -45,26 +45,105 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      </template>
 
-      <template #item.amount="{item}">
-        <v-chip :color="getTypeColor(item.type)" dark>{{ item.amount }} €</v-chip>
-      </template>
+      <!-- Filters -->
+      <v-container fluid>
+        <v-row>
+          <v-col cols="4">
+            <v-row class="pa-6">
+              <!-- Filter for entity/source-->
+              <v-text-field v-model="entitySourceFilter" type="text" label="Entity/Source Filter"></v-text-field>
+            </v-row>
+          </v-col>
 
-      <template #item.createdAt="{item}">
-        <span>{{ item.createdAt.toDate().toLocaleDateString() + " " + item.createdAt.toDate().toLocaleTimeString() }}</span>
-      </template>
+          <v-col cols="2">
+            <v-row class="pa-6">
+              <!-- Filter for type -->
+              <v-select :items="typeList" v-model="typeFilter" label="Type Filter"></v-select>
+            </v-row>
+          </v-col>
 
-      <template #item.category="{item}">
-        <v-icon>{{ getCategory(item.category).icon }}</v-icon>
-        {{ getCategory(item.category).text }}
-      </template>
+          <v-col cols="1">
+            <v-row class="pa-6">
+              <!-- Signal to filter by amount -->
+              <v-select :items="signalList" v-model="signalAmountFilter" label="Signal"></v-select>
+            </v-row>
+          </v-col>
 
-      <template #item.actions="{item}">
-        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-      </template>
-    </v-data-table>
-  </v-container>
+          <v-col cols="1">
+            <v-row class="pa-6">
+              <!-- Filter for amount-->
+              <v-text-field v-model="amoutFilter" type="text" label="Amount"></v-text-field>
+            </v-row>
+          </v-col>
+
+          <!-- Filter for date -->
+          <v-col cols="2">
+            <v-row class="pa-6">
+              <v-menu
+                v-model="menuInitialDate"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field v-model="initialDate" label="From" readonly v-on="on"></v-text-field>
+                </template>
+                <v-date-picker v-model="initialDate" @input="menuInitialDate = false"></v-date-picker>
+              </v-menu>
+            </v-row>
+          </v-col>
+
+          <v-col cols="2">
+            <v-row class="pa-6">
+              <v-menu
+                v-model="menuFinalDate"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field v-model="finalDate" label="To" readonly v-on="on"></v-text-field>
+                </template>
+                <v-date-picker v-model="finalDate" @input="menuFinalDate = false"></v-date-picker>
+              </v-menu>
+            </v-row>
+          </v-col>
+        </v-row>
+
+        <!-- Filter for Category -->
+        <v-row>
+          <v-combobox v-model="categoryFilterSelect" :items="categories" label="Category">
+            <template slot="item" slot-scope="data">
+              <v-icon>{{ data.item.icon }}</v-icon>
+              <span class="cb-item">{{ data.item.text }}</span>
+            </template>
+          </v-combobox>
+        </v-row>
+      </v-container>
+    </template>
+
+    <template #item.amount="{item}">
+      <v-chip :color="getTypeColor(item.type)" dark>{{ item.amount }} €</v-chip>
+    </template>
+
+    <template #item.createdAt="{item}">
+      <span>{{ item.createdAt.toDate().toLocaleDateString() + " " + item.createdAt.toDate().toLocaleTimeString() }}</span>
+    </template>
+
+    <template #item.category="{item}">
+      <v-icon>{{ getCategory(item.category).icon }}</v-icon>
+      {{ getCategory(item.category).text }}
+    </template>
+
+    <template #item.actions="{item}">
+      <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+    </template>
+  </v-data-table>
 </template>
 <script>
 import axios from "axios";
@@ -80,14 +159,26 @@ export default {
         { text: "Id", value: "id" },
         { text: "Entity", value: "entity" },
         { text: "Source", value: "source" },
-        { text: "Type", value: "type" },
-        { text: "Amount", value: "amount" },
-        { text: "Date", value: "createdAt" },
-        { text: "Category", value: "category" },
+        { text: "Type", value: "type", filter: this.typeFilterMethod },
+        { text: "Amount", value: "amount", filter: this.amountFilterMethod },
+        { text: "Date", value: "createdAt", filter: this.dateFilterMethod },
+        {
+          text: "Category",
+          value: "category",
+          filter: this.categoryFilterMethod
+        },
         { text: "Actions", value: "actions", sortable: false }
       ],
       balance: 0,
       transactions: [],
+      transaction: {
+        id: "",
+        category: ""
+      },
+      categorySelected: "",
+      editedIndex: -1,
+
+      //* Filter Variables
       categories: [
         { text: "Not Classified", icon: "mdi-help" },
         { text: "Home", icon: "mdi-home" },
@@ -105,13 +196,23 @@ export default {
         { text: "Arrangements", icon: "mdi-hammer-screwdriver" },
         { text: "School", icon: "mdi-school" }
       ],
-      dialog: false,
-      transaction: {
-        id: "",
-        category: ""
-      },
-      categorySelected: "",
-      editedIndex: -1,
+      categoryFilterSelect: "",
+      typeList: [
+        { text: "All" },
+        { text: "Debit" },
+        { text: "Credit" },
+        { text: "Invoice" }
+      ],
+      signalList: [{ text: "=" }, { text: ">" }, { text: "<" }],
+      entitySourceFilter: "",
+      typeFilter: "",
+      signalAmountFilter: "",
+      amoutFilter: "",
+      menuInitialDate: "",
+      initialDate: "",
+      menuFinalDate: "",
+      finalDate: "",
+      dialog: false
     };
   },
   methods: {
@@ -154,7 +255,7 @@ export default {
           querySnapshot.forEach(transaction => {
             this.transactions.push(transaction.data());
 
-            if (transaction.data().type == "credit") {
+            if(transaction.data().type == 'credit') {
               this.balance += transaction.data().amount;
             } else {
               this.balance -= transaction.data().amount;
@@ -164,28 +265,16 @@ export default {
     },
 
     getTypeColor(type) {
-      if (type == "credit") return "red";
+      if (type == "debit") return "red";
       if (type == "invoice") return "orange";
       else return "green";
     },
 
     getBalanceColor(balance) {
       if (balance < 0) return "red darken-4";
-      else return "green darken-1";
+      else return "green darken-1"
     },
 
-    getCategory(value) {
-      //let index = this.categories.indexOf(value);
-
-      let index = -1;
-      for (let i = 0; i < this.categories.length; i++) {
-        if (this.categories[i].text == value) {
-          index = i;
-        }
-      }
-
-      return this.categories[index];
-    },
     editItem(item) {
       this.editedIndex = this.transactions.indexOf(item);
       this.transaction = Object.assign({}, item);
@@ -219,6 +308,74 @@ export default {
           });
         });
     },
+
+    getCategory(value) {
+      //let index = this.categories.indexOf(value);
+
+      let index = -1;
+      for (let i = 0; i < this.categories.length; i++) {
+        if (this.categories[i].text == value) {
+          index = i;
+        }
+      }
+
+      return this.categories[index];
+    },
+
+    //* Filter for Type
+    typeFilterMethod(value) {
+      if (!this.typeFilter) {
+        return true;
+      }
+
+      if (this.typeFilter == "All") {
+        return value;
+      }
+
+      return value.toLowerCase().includes(this.typeFilter.toLowerCase());
+    },
+
+    //* Filter for Amount
+    amountFilterMethod(value) {
+      if (!this.amoutFilter || !this.signalAmountFilter) {
+        return true;
+      }
+
+      if (this.signalAmountFilter == "=") {
+        return value == this.amoutFilter;
+      }
+
+      if (this.signalAmountFilter == ">") {
+        return value >= this.amoutFilter;
+      }
+
+      if (this.signalAmountFilter == "<") {
+        return value <= this.amoutFilter;
+      }
+    },
+
+    //* Filter for Date
+    dateFilterMethod(value) {
+      if (!this.initialDate || !this.finalDate) {
+        return true;
+      }
+
+      return (
+        value.toDate() >= new Date(this.initialDate) &&
+        value.toDate() <= new Date(this.finalDate)
+      );
+    },
+
+    //* Filter for Category
+    categoryFilterMethod(value) {
+      if (!this.categoryFilterSelect) {
+        return true;
+      }
+
+      return value
+        .toLowerCase()
+        .includes(this.categoryFilterSelect.text.toLowerCase());
+    }
   },
   mounted() {
     this.getAllTransactions();
