@@ -50,7 +50,7 @@
     />
 
     <top-five-month-expenses
-      v-if="loaded"
+      v-if="loaded && initialDate"
       :topFiveMonthExpenses="topFiveMonthExpenses"
       :monthName="monthName"
     />
@@ -108,6 +108,7 @@ export default {
       this.getTransactionsByCategory();
 
       //* Get Top Five Month Expenses
+      console.log(this.initialDate);
       if(this.initialDate != "") {
         let month = new Date(this.initialDate).getMonth();
         let year =  new Date(this.initialDate).getFullYear();
