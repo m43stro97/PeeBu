@@ -5,7 +5,7 @@ Daniel Rodrigues, 2150675
 Luís Campos, 2192735
 
 ## Jenkins credentials
-**Jenkins machine IP:** 35.204.68.27
+**Jenkins machine IP:** 34.91.89.183
 
 **Username:** admin
 
