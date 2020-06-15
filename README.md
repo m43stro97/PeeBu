@@ -14,7 +14,7 @@ Luís Campos, 2192735
 
 **Staging machine IP:** 34.90.254.120
 
-**Production machine IP:** 34.91.89.183
+**Production machine IP:** 35.204.116.158
 
 
 **Note:** The mockups are located in the "mockups" branch in "mockups" folder"
